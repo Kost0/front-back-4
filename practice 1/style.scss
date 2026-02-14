@@ -1,0 +1,31 @@
+$primary-color: rgb(136, 136, 232);
+$font-size: 16px;
+
+@mixin card-shadow($radius) {
+    border-radius: $radius;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card {
+    background-color: $primary-color;
+    padding: 20px;
+    text-align: center;
+    width: 360px;
+    border: 2px solid $primary-color; 
+
+    @include card-shadow(12px);
+
+    &__image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    &__title {
+        margin: 15px 0;
+    }
+
+    &__desc {
+        font-size: $font-size;
+    }
+}

@@ -7,12 +7,22 @@ function formatPrice(price) {
 export default function ProductItem({ product, onEdit, onDelete }) {
   return (
     <div className="productRow">
+      {product.imageUrl && (
+        <div className="productImage">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+          />
+        </div>
+      )}
       <div className="productMain">
         <div className="productTop">
           <span className="productId">#{product.id}</span>
           <span className="productName">{product.name}</span>
           <span className="productCategory">{product.category}</span>
         </div>
+
         <div className="productDesc">{product.description}</div>
         <div className="productMeta">
           <span className="productPrice">{formatPrice(product.price)}</span>

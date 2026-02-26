@@ -8,6 +8,7 @@ export default function ProductModal({ open, mode, initialProduct, onClose, onSu
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -16,6 +17,7 @@ export default function ProductModal({ open, mode, initialProduct, onClose, onSu
     setDescription(initialProduct?.description ?? '');
     setPrice(initialProduct?.price != null ? String(initialProduct.price) : '');
     setStock(initialProduct?.stock != null ? String(initialProduct.stock) : '');
+    setImageUrl(initialProduct?.imageUrl ?? '');
   }, [open, initialProduct]);
 
   if (!open) return null;
@@ -42,6 +44,7 @@ export default function ProductModal({ open, mode, initialProduct, onClose, onSu
       description: trimmedDesc,
       price: parsedPrice,
       stock: parsedStock,
+      imageUrl: imageUrl.trim() || undefined,
     });
   };
 
@@ -83,6 +86,27 @@ export default function ProductModal({ open, mode, initialProduct, onClose, onSu
               placeholder="Краткое описание характеристик товара"
             />
           </label>
+
+          <label className="label">
+            Ссылка на изображение
+            <input
+              className="input"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              type="url"
+            />
+          </label>
+
+          {imageUrl.trim() && (
+            <div className="imagePreview">
+              <img
+                src={imageUrl.trim()}
+                alt="Предпросмотр"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
 
           <div className="formRow">
             <label className="label">

@@ -9,8 +9,10 @@ const app = express();
 const PORT = 3000;
 
 const JWT_SECRET = "acess_secret";
+const REFRESH_SECRET = "refresh_secret";
 
-const ACCESS_EXPIRES_IN = "15m";
+const ACCESS_EXPIRES_IN = "10s";
+const REFRESH_EXPIRES_IN = "7d";
 
 const swaggerOptions = {
   definition: {
@@ -35,7 +37,7 @@ const swaggerOptions = {
 };
 
 let users = [];
-
+let refreshTokens = new Set(); 
 let products = [
   { id: 1, title: "product 1", category: "техника", description: "описание первого продукта", price: 100 },
   { id: 2, title: "product 2", category: "техника", description: "описание второго продукта", price: 150 },
@@ -64,6 +66,21 @@ function authMiddleware(req, res, next) {
       error: "Invalid or expired token",
     });
   }
+}
+
+function generateTokens(user) {
+  const accessToken = jwt.sign(
+    { sub: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: ACCESS_EXPIRES_IN }
+  );
+  const refreshToken = jwt.sign(
+    { sub: user.id, email: user.email },
+    REFRESH_SECRET,
+    { expiresIn: REFRESH_EXPIRES_IN }
+  );
+  refreshTokens.add(refreshToken);
+  return { accessToken, refreshToken };
 }
 
 function findUserOr404(email, res) {
@@ -151,10 +168,7 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
     });
   }
 
-  res.json({
-    id: user.id,
-    email: user.email
-  });
+  res.json({ id: user.id, email: user.email });
 });
 
 /**
@@ -236,7 +250,7 @@ app.post("/api/auth/register", async (req, res) => {
  * /api/auth/login:
  *   post:
  *     summary: Авторизация пользователя
- *     description: Проверяет email и пароль пользователя
+ *     description: Проверяет email и пароль. Возвращает пару accessToken + refreshToken. Скопируйте accessToken и вставьте в кнопку Authorize 🔒
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -262,16 +276,20 @@ app.post("/api/auth/register", async (req, res) => {
  *             schema:
  *               type: object
  *               properties:
- *                 login:
- *                   type: boolean
- *                   example: true
  *                 accessToken:
  *                   type: string
- *                   description: JWT-токен
+ *                   description: JWT access-токен, живёт 15 минут
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
+ *                   type: string
+ *                   description: JWT refresh-токен, живёт 7 дней
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Отсутствуют обязательные поля
  *       401:
  *         description: Неверные учётные данные
+ *       404:
+ *         description: Пользователь не найден
  */
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
@@ -279,34 +297,74 @@ app.post("/api/auth/login", async (req, res) => {
     return res.status(400).json({ error: "email and password are required" });
   }
 
-  const user = users.find(u => u.email === email);
-  if (!user) {
-    return res.status(401).json({
-      error: "Invalid credintails",
-    });
+  const user = findUserOr404(email, res);
+  if (!user) return;
+
+  const isAuthenticated = await verifyPassword(password, user.hashedPassword);
+  if (isAuthenticated) {
+    const tokens = generateTokens(user);
+    res.status(200).json(tokens);
+  } else {
+    res.status(401).json({ error: "not authenticated" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Обновить пару токенов
+ *     description: Принимает refresh-токен из заголовка Authorization (Bearer) и возвращает новую пару accessToken + refreshToken. Старый refresh-токен становится недействительным.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Новая пара токенов
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: Новый access-токен, живёт 15 минут
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
+ *                   type: string
+ *                   description: Новый refresh-токен, живёт 7 дней
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       401:
+ *         description: Токен отсутствует, недействителен или уже был использован
+ */
+app.post("/api/auth/refresh", (req, res) => {
+  const header = req.headers.authorization || "";
+  const [scheme, token] = header.split(" ");
+
+  if (scheme !== "Bearer" || !token) {
+    return res.status(401).json({ error: "Missing or invalid Authorization header" });
   }
 
-  const isValid = await bcrypt.compare(password, user.hashedPassword);
-  if (!isValid) {
-    return res.status(401).json({
-      error: "Invalid creadintails",
-    });
+  if (!refreshTokens.has(token)) {
+    return res.status(401).json({ error: "Refresh token is invalid or already used" });
   }
 
-  const accessToken = jwt.sign(
-    {
-      sub: user.id,
-      email: user.email,
-    },
-    JWT_SECRET,
-    {
-      expiresIn: ACCESS_EXPIRES_IN,
+  try {
+    const payload = jwt.verify(token, REFRESH_SECRET);
+
+    refreshTokens.delete(token);
+
+    const user = users.find(u => u.id === payload.sub);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
     }
-  );
 
-  res.json({
-    accessToken,
-  });
+    const tokens = generateTokens(user);
+    res.json(tokens);
+  } catch (err) {
+    refreshTokens.delete(token);
+    return res.status(401).json({ error: "Refresh token expired or invalid" });
+  }
 });
 
 /**

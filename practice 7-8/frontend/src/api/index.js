@@ -1,4 +1,4 @@
-const getToken = () => localStorage.getItem('accessToken')
+const getToken   = () => localStorage.getItem('accessToken')
 const getRefresh = () => localStorage.getItem('refreshToken')
 
 export const setTokens = (access, refresh) => {
@@ -55,9 +55,16 @@ export const authApi = {
 }
 
 export const productsApi = {
-  getAll:   ()        => request('GET',    '/api/products'),
-  getOne:   (id)      => request('GET',    `/api/products/${id}`),
-  create:   (data)    => request('POST',   '/api/products', data),
-  update:   (id, data)=> request('PUT',    `/api/products/${id}`, data),
-  remove:   (id)      => request('DELETE', `/api/products/${id}`),
+  getAll:  ()         => request('GET',    '/api/products'),
+  getOne:  (id)       => request('GET',    `/api/products/${id}`),
+  create:  (data)     => request('POST',   '/api/products', data),
+  update:  (id, data) => request('PUT',    `/api/products/${id}`, data),
+  remove:  (id)       => request('DELETE', `/api/products/${id}`),
+}
+
+export const usersApi = {
+  getAll:  ()         => request('GET',    '/api/users'),
+  getOne:  (id)       => request('GET',    `/api/users/${id}`),
+  update:  (id, data) => request('PUT',    `/api/users/${id}`, data),
+  block:   (id)       => request('DELETE', `/api/users/${id}`),
 }

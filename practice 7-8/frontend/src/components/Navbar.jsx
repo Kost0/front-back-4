@@ -13,6 +13,7 @@ export default function Navbar({ user, onLogout }) {
 
   const link = (path, label) => (
     <span
+      key={path}
       onClick={() => navigate(path)}
       style={{
         cursor: 'pointer',
@@ -24,6 +25,12 @@ export default function Navbar({ user, onLogout }) {
     </span>
   )
 
+  const roleBadgeColor = {
+    admin:  '#c00',
+    seller: '#c70',
+    user:   '#060',
+  }
+
   return (
     <nav style={{
       borderBottom: '2px solid #6365e9',
@@ -33,16 +40,31 @@ export default function Navbar({ user, onLogout }) {
       alignItems: 'center',
       gap: '16px',
     }}>
-      <span style={{ fontWeight: 'bold' }}>Shop</span>
+      <span style={{ fontWeight: 'bold', fontSize: 16 }}>Shop</span>
 
-      {isLoggedIn() && (
-        <>
-          {link('/products', 'Товары')}
-        </>
-      )}
+      {link('/products', 'Товары')}
+
+      {user?.role === 'admin' && link('/users', 'Пользователи')}
 
       <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px', alignItems: 'center' }}>
-        {user && <span style={{ fontSize: 12, color: '#555' }}>{user.email}</span>}
+        {user && (
+          <>
+            <span style={{ fontSize: 12, color: '#555' }}>
+              {user.first_name} {user.last_name}
+            </span>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 'bold',
+              padding: '2px 6px',
+              border: `1px solid ${roleBadgeColor[user.role] || '#888'}`,
+              color: roleBadgeColor[user.role] || '#888',
+              borderRadius: 3,
+            }}>
+              {user.role}
+            </span>
+          </>
+        )}
+
         {isLoggedIn()
           ? <button className="small" onClick={logout}>Выйти</button>
           : <>

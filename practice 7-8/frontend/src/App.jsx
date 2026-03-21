@@ -5,9 +5,16 @@ import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProductsPage from './pages/ProductsPage'
+import UsersPage from './pages/UsersPage'
 
 function RequireAuth({ children }) {
   if (!isLoggedIn()) return <Navigate to="/login" replace />
+  return children
+}
+
+function RequireRole({ user, roles, children, authChecked }) {
+  if (!authChecked) return null
+  if (!user || !roles.includes(user.role)) return <Navigate to="/products" replace />
   return children
 }
 
@@ -29,7 +36,7 @@ export default function App() {
 
   useEffect(() => { loadUser() }, [])
 
-  const handleLogin = () => loadUser()
+  const handleLogin  = () => loadUser()
   const handleLogout = () => setUser(null)
 
   if (!authChecked) return null
@@ -41,9 +48,16 @@ export default function App() {
         <Route path="/login"    element={<LoginPage onLogin={handleLogin} />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/products" element={
-          <RequireAuth><ProductsPage /></RequireAuth>
+          <ProductsPage user={user} />
         } />
-        <Route path="*" element={<Navigate to={isLoggedIn() ? '/products' : '/login'} replace />} />
+        <Route path="/users" element={
+          <RequireAuth>
+            <RequireRole user={user} roles={['admin']} authChecked={authChecked}>
+              <UsersPage />
+            </RequireRole>
+          </RequireAuth>
+        } />
+        <Route path="*" element={<Navigate to="/products" replace />} />
       </Routes>
     </>
   )

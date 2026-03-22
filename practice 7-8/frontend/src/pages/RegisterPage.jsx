@@ -32,7 +32,7 @@ export default function RegisterPage() {
         <label htmlFor="rr">Роль</label>
         <select id="rr" value={form.role} onChange={set('role')}
           style={{ fontFamily: 'monospace', fontSize: 14, width: '100%', padding: '6px 8px', border: '2px solid #6365e9', outline: 'none' }}>
-          <option value="user">user — покупатель</option>
+          <option value="user">user — пользователь</option>
           <option value="seller">seller — продавец</option>
           <option value="admin">admin — администратор</option>
         </select>

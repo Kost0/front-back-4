@@ -476,8 +476,9 @@ app.delete('/api/users/:id',
  *     responses:
  *       200: { description: Массив товаров }
  */
-app.get('/api/products', (req, res) => {
-  res.json(products);
+app.get('/api/products', authMiddleware,
+  (req, res) => {
+    res.json(products);
 });
 
 /**

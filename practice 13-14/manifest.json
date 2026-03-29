@@ -1,0 +1,29 @@
+{
+  "name": "Мои заметки",
+  "short_name": "Заметки",
+  "description": "Простое приложение для заметок, работающее офлайн. PWA — Практические занятия 13–14.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0F1023",
+  "theme_color": "#2D3A8C",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "icons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,55 +1,40 @@
 'use strict';
 
-const CACHE_NAME = 'notes-cache-v2';
+const APP_SHELL_CACHE = 'app-shell-v3';
+const DYNAMIC_CACHE = 'dynamic-content-v1';
 
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  '/icons/favicon-16x16.png',
-  '/icons/favicon-32x32.png',
-  '/icons/favicon-128x128.png',
+const APP_SHELL_ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+
+  './content/home.html',
+  './content/about.html',
+
+  './icons/favicon-16x16.png',
+  './icons/favicon-32x32.png',
+  './icons/favicon-128x128.png',
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Установка, версия кэша:', CACHE_NAME);
-
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Кэшируем ресурсы...');
-        return cache.addAll(ASSETS);
-      })
-      .then(() => {
-        console.log('[SW] Все ресурсы закэшированы');
-        return self.skipWaiting();
-      })
-      .catch((err) => {
-        console.error('[SW] Ошибка при кэшировании:', err);
-      })
+    caches.open(APP_SHELL_CACHE)
+      .then(cache => cache.addAll(APP_SHELL_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Активация');
-
   event.waitUntil(
     caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME)
-            .map((oldCache) => {
-              console.log('[SW] Удаляем старый кэш:', oldCache);
-              return caches.delete(oldCache);
-            })
-        );
-      })
-      .then(() => {
-        return self.clients.claim();
-      })
+      .then(keys => Promise.all(
+        keys
+          .filter(k => k !== APP_SHELL_CACHE && k !== DYNAMIC_CACHE)
+          .map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -57,42 +42,65 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request);
-      })
-    );
+  if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith('/content/')) {
+    event.respondWith(networkFirst(event.request));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              const responseClone = networkResponse.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => cache.put(event.request, responseClone));
-            }
-            return networkResponse;
-          })
-          .catch(() => {
-            if (event.request.destination === 'document') {
-              return caches.match('/index.html');
-            }
-          });
-      })
-  );
+  event.respondWith(cacheFirst(event.request));
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response && response.status === 200) {
+    const clone = response.clone();
+    const cache = await caches.open(APP_SHELL_CACHE);
+    cache.put(request, clone);
   }
+  return response;
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+
+    if (response && response.status === 200) {
+      const clone = response.clone();
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, clone);
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    return caches.match('./content/home.html');
+  }
+}
+
+self.addEventListener('push', (event) => {
+  let data = { title: 'Новое уведомление', body: '' };
+
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body || '',
+    icon: './icons/favicon-128x128.png',
+    badge: './icons/favicon-32x32.png'
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Уведомление', options)
+  );
 });

@@ -4,25 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
 
   <meta name="mobile-web-app-capable" content="yes">
-
   <meta name="theme-color" content="#2D3A8C">
 
-  <link rel="apple-touch-icon" href="/icons/favicon-128x128.png">
-
+  <link rel="apple-touch-icon" href="./icons/favicon-128x128.png">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
-  <link rel="icon" href="icons/favicon.ico" sizes="16x16" type="image/x-icon">
-  <link rel="icon" href="icons/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="./icons/favicon.ico" sizes="16x16" type="image/x-icon">
+  <link rel="icon" href="./icons/favicon-32x32.png" sizes="32x32" type="image/png">
 
-  <title>Мои заметки</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Мои заметки — App Shell</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
   <div class="app-shell">
     <header class="app-header">
       <div class="header-inner">
@@ -30,62 +27,33 @@
           <span class="logo-icon">✦</span>
           <span class="logo-text">Заметки</span>
         </div>
+
+        <nav class="shell-nav" aria-label="Навигация">
+          <button id="home-btn" class="shell-tab is-active" type="button">Главная</button>
+          <button id="about-btn" class="shell-tab" type="button">О приложении</button>
+        </nav>
       </div>
     </header>
 
-    <main class="main-content">
-      <section class="input-section">
-        <div class="input-card">
-          <h2 class="input-title">Новая заметка</h2>
-          <form id="note-form" class="note-form">
-            <div class="field-group">
-              <input
-                type="text"
-                id="note-title"
-                class="field-input"
-                placeholder="Заголовок..."
-                maxlength="60"
-              >
-            </div>
-            <div class="field-group">
-              <textarea
-                id="note-body"
-                class="field-textarea"
-                placeholder="Текст заметки... (необязательно)"
-                rows="3"
-                maxlength="500"
-              ></textarea>
-            </div>
-            <button type="submit" class="btn-add">
-              <span class="btn-icon">+</span>
-              <span>Добавить</span>
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <section class="notes-section">
-        <div class="notes-header">
-          <h2 class="notes-title">Список заметок</h2>
-          <span id="notes-count" class="notes-count">0</span>
-        </div>
-
-        <div id="notes-empty" class="notes-empty">
-          <div class="empty-icon">✦</div>
-          <p>Нет заметок. Добавьте первую!</p>
-        </div>
-
-        <ul id="notes-list" class="notes-list"></ul>
-      </section>
+    <main id="app-content" class="main-content" aria-live="polite">
+      <div class="notes-empty" style="margin-top: 12px;">
+        <div class="empty-icon">✦</div>
+        <p>Загрузка…</p>
+      </div>
     </main>
 
     <footer class="app-footer">
-      <p>Занятия 13–14</p>
+      <div class="push-controls">
+        <button id="enable-push" class="btn-push btn-push-on" type="button">Включить уведомления</button>
+        <button id="disable-push" class="btn-push btn-push-off" type="button" style="display:none;">Отключить уведомления</button>
+      </div>
+      <p>Занятия 15–16 (HTTPS + App Shell + WebSocket + Push)</p>
     </footer>
   </div>
 
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script src="app.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>

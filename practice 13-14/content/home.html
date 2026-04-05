@@ -1,0 +1,46 @@
+<section class="input-section">
+  <div class="input-card">
+    <h2 class="input-title">Новая заметка</h2>
+
+    <form id="note-form" class="note-form">
+      <div class="field-group">
+        <input
+          type="text"
+          id="note-title"
+          class="field-input"
+          placeholder="Заголовок..."
+          maxlength="60"
+        >
+      </div>
+
+      <div class="field-group">
+        <textarea
+          id="note-body"
+          class="field-textarea"
+          placeholder="Текст заметки... (необязательно)"
+          rows="3"
+          maxlength="500"
+        ></textarea>
+      </div>
+
+      <button type="submit" class="btn-add">
+        <span class="btn-icon">+</span>
+        <span>Добавить</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<section class="notes-section">
+  <div class="notes-header">
+    <h2 class="notes-title">Список заметок</h2>
+    <span id="notes-count" class="notes-count">0</span>
+  </div>
+
+  <div id="notes-empty" class="notes-empty">
+    <div class="empty-icon">✦</div>
+    <p>Нет заметок. Добавьте первую!</p>
+  </div>
+
+  <ul id="notes-list" class="notes-list"></ul>
+</section>

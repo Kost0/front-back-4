@@ -22,6 +22,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .logo { display: flex; align-items: center; gap: 8px; }
@@ -140,3 +141,53 @@ body {
   to { opacity: 0; transform: translateX(20px); max-height: 0; padding: 0; margin: 0; overflow: hidden; }
 }
 .note-item.removing { animation: slideOut 0.2s ease forwards; }
+
+.shell-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.shell-tab {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+  padding: 8px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.shell-tab.is-active {
+  border-color: #4a6cf7;
+  color: #4a6cf7;
+  font-weight: 700;
+}
+
+/* Push buttons */
+.push-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-push {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.btn-push-on {
+  background: #e8f5e9;
+  border-color: #b7e1c0;
+  color: #1b5e20;
+}
+
+.btn-push-off {
+  background: #ffebee;
+  border-color: #ffcdd2;
+  color: #b71c1c;
+}

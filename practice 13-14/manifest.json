@@ -1,9 +1,9 @@
 {
   "name": "Мои заметки",
   "short_name": "Заметки",
-  "description": "Простое приложение для заметок, работающее офлайн. PWA — Практические занятия 13–14.",
-  "start_url": "/",
-  "scope": "/",
+  "description": "Простое приложение для заметок, работающее офлайн. App Shell + WebSocket + Push.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0F1023",

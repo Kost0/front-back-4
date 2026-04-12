@@ -1,45 +1,55 @@
 <section class="input-section">
   <div class="input-card">
     <h2 class="input-title">Новая заметка</h2>
-
     <form id="note-form" class="note-form">
-      <div class="field-group">
-        <input
-          type="text"
-          id="note-title"
-          class="field-input"
-          placeholder="Заголовок..."
-          maxlength="60"
-        >
-      </div>
+      <input
+        id="note-title"
+        class="field-input"
+        type="text"
+        placeholder="Заголовок заметки"
+        required
+        autocomplete="off"
+      >
+      <textarea
+        id="note-body"
+        class="field-textarea"
+        placeholder="Текст заметки (необязательно)"
+        rows="3"
+      ></textarea>
+      <button class="btn-add" type="submit">Добавить заметку</button>
+    </form>
+  </div>
 
-      <div class="field-group">
-        <textarea
-          id="note-body"
-          class="field-textarea"
-          placeholder="Текст заметки... (необязательно)"
-          rows="3"
-          maxlength="500"
-        ></textarea>
-      </div>
-
-      <button type="submit" class="btn-add">
-        <span class="btn-icon">+</span>
-        <span>Добавить</span>
-      </button>
+  <div class="input-card">
+    <h2 class="input-title">Заметка с напоминанием</h2>
+    <form id="reminder-form" class="note-form">
+      <input
+        id="reminder-text"
+        class="field-input"
+        type="text"
+        placeholder="Текст напоминания"
+        required
+        autocomplete="off"
+      >
+      <input
+        id="reminder-time"
+        class="field-input"
+        type="datetime-local"
+        required
+      >
+      <button class="btn-add btn-reminder" type="submit">Добавить с напоминанием</button>
     </form>
   </div>
 </section>
 
 <section class="notes-section">
   <div class="notes-header">
-    <h2 class="notes-title">Список заметок</h2>
+    <span class="notes-title">Заметки</span>
     <span id="notes-count" class="notes-count">0</span>
   </div>
 
   <div id="notes-empty" class="notes-empty">
-    <div class="empty-icon">✦</div>
-    <p>Нет заметок. Добавьте первую!</p>
+    <p>Заметок пока нет — добавьте первую!</p>
   </div>
 
   <ul id="notes-list" class="notes-list"></ul>

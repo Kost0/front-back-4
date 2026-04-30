@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  backend1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3000"
+      SERVER_ID: "backend-1"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3000"
+      SERVER_ID: "backend-2"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3000"
+      SERVER_ID: "backend-3-backup"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  haproxy:
+    image: haproxy:2.9
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+      - "8404:8404"
+    volumes:
+      - ./Haproxy.docker.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      backend1:
+        condition: service_healthy
+      backend2:
+        condition: service_healthy
+      backend3:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "8081:8081"
+      - "8082:8082"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    restart: unless-stopped

@@ -1,3 +1,185 @@
+# Практика 19 — Работа с PostgreSQL
+
+REST API для управления пользователями с хранением данных в PostgreSQL.
+
+---
+
+## Endpoints
+
+| Метод | URL | Описание |
+|---|---|---|
+| POST | `/api/users` | Создать пользователя |
+| GET | `/api/users` | Получить всех пользователей |
+| GET | `/api/users/:id` | Получить пользователя по id |
+| PATCH | `/api/users/:id` | Частично обновить пользователя |
+| DELETE | `/api/users/:id` | Удалить пользователя |
+
+---
+
+## Примеры запросов
+
+### Создать пользователя
+
+```bash
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"first_name": "Иван", "last_name": "Иванов", "age": 25}'
+```
+
+```json
+{
+  "id": 1,
+  "first_name": "Иван",
+  "last_name": "Иванов",
+  "age": 25,
+  "created_at": 1700000000,
+  "updated_at": 1700000000
+}
+```
+
+### Получить всех пользователей
+
+```bash
+curl http://localhost:3000/api/users
+```
+
+### Получить пользователя по id
+
+```bash
+curl http://localhost:3000/api/users/1
+```
+
+### Частично обновить пользователя
+
+```bash
+curl -X PATCH http://localhost:3000/api/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{"age": 26}'
+```
+
+Можно передавать любой набор полей — только те, что указаны, будут обновлены. `updated_at` обновляется автоматически.
+
+### Удалить пользователя
+
+```bash
+curl -X DELETE http://localhost:3000/api/users/1
+```
+
+```json
+{ "message": "Пользователь удалён" }
+```
+
+---
+
+## Параметры подключения к БД
+
+Заданы в `server.js` в объекте `Pool`:
+
+```js
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'users',
+  password: 'password',
+  port: 5432,
+});
+```
+
+Если меняешь параметры при запуске Docker-контейнера — меняй и здесь.
+
+---
+# Практика 20 — Работа с MongoDB
+
+REST API для управления пользователями с хранением данных в MongoDB через Mongoose.
+
+---
+
+## Endpoints
+
+| Метод | URL | Описание |
+|---|---|---|
+| POST | `/api/users` | Создать пользователя |
+| GET | `/api/users` | Получить всех пользователей |
+| GET | `/api/users/:id` | Получить пользователя по id |
+| PATCH | `/api/users/:id` | Частично обновить пользователя |
+| DELETE | `/api/users/:id` | Удалить пользователя |
+
+---
+
+## Примеры запросов
+
+### Создать пользователя
+
+```bash
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"first_name": "Иван", "last_name": "Иванов", "age": 25}'
+```
+
+```json
+{
+  "_id": "65a1b2c3d4e5f6a7b8c9d0e1",
+  "first_name": "Иван",
+  "last_name": "Иванов",
+  "age": 25,
+  "created_at": 1700000000,
+  "updated_at": 1700000000
+}
+```
+
+### Получить всех пользователей
+
+```bash
+curl http://localhost:3000/api/users
+```
+
+### Получить пользователя по id
+
+```bash
+# id берётся из поля _id ответа на POST
+curl http://localhost:3000/api/users/65a1b2c3d4e5f6a7b8c9d0e1
+```
+
+### Частично обновить пользователя
+
+```bash
+curl -X PATCH http://localhost:3000/api/users/65a1b2c3d4e5f6a7b8c9d0e1 \
+  -H "Content-Type: application/json" \
+  -d '{"age": 26}'
+```
+
+Можно передавать любой набор полей. `updated_at` обновляется автоматически.
+
+### Удалить пользователя
+
+```bash
+curl -X DELETE http://localhost:3000/api/users/65a1b2c3d4e5f6a7b8c9d0e1
+```
+
+```json
+{ "message": "Пользователь удалён" }
+```
+
+---
+
+## Строка подключения к БД
+
+Задана в `server.js`:
+
+```js
+MONGODB_URI = 'mongodb://YourMongoAdmin:1234@localhost:27017/usersdb?authSource=admin'
+```
+
+| Параметр | Значение | Описание |
+|---|---|---|
+| `YourMongoAdmin` | логин | Задаётся при запуске контейнера через `MONGO_INITDB_ROOT_USERNAME` |
+| `1234` | пароль | Задаётся через `MONGO_INITDB_ROOT_PASSWORD` |
+| `localhost:27017` | адрес | Хост и порт MongoDB |
+| `usersdb` | база данных | Создаётся автоматически при первой записи |
+| `authSource=admin` | параметр | Указывает, в какой БД хранятся учётные данные пользователя |
+
+---
+
 # Практика 22 — Балансировка нагрузки
 
 Тестовая система балансировки нагрузки на основе **Nginx** и **HAProxy** с тремя backend-серверами на Node.js. Разворачивается одной командой через Docker Compose.

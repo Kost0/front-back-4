@@ -1,0 +1,13 @@
+{
+  "name": "rabbitmq-task-system",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "producer": "node producer.js",
+    "worker": "node worker.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "express": "^4.18.2"
+  }
+}
